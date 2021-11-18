@@ -15,12 +15,22 @@ client = InfluxDBClient(url="http://influxdb:8086", token=db_token, org=my_org)
 write_api = client.write_api(write_options=SYNCHRONOUS)
 query_api = client.query_api()
 
+def enviar_DB(a):
+    lista = []
+    valores = a
+    vector =  valores.split(",")
+    presion =  float(vector[0])
+    temperatura =  float(vector[1])
+    nivel =  float(vector[2])
+    write_api = client.write_api(write_options=SYNCHRONOUS)
+    point = Point("Mediciones").field("TEMPERATURA", temperatura).time(datetime.utcnow(),WritePrecision.NS).field("PRESION", presion).time(datetime.utcnow(),WritePrecision.NS).field("NIVEL", nivel).time(datetime.utcnow(), WritePrecision.NS)
+    write_api.write(my_bucket, my_org, point)
+    return
+
 def process_function(msg):
   mesage = msg.decode("utf-8")
-
-  string_list = mesage.split(",")
-  point = Point(string_list[1]).tag("place", "Santa marta").field(string_list[3], float(string_list[2])).time(datetime.utcnow(), WritePrecision.NS)
-  write_api.write(my_bucket, my_org, point)
+  print(mesage)
+  enviar_DB(mesage)
   return
 
 while 1:
